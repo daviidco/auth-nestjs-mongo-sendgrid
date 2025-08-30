@@ -31,6 +31,16 @@ Authenticaction microservice with [Nest](https://github.com/nestjs/nest) framewo
 $ npm install
 ```
 
+## Run Mongo Database
+
+```bash
+docker run -d \
+  --name mongo-auth \
+  -p 27017:27017 \
+  -e MONGO_INITDB_DATABASE=auth_microservice \
+  mongo:latest
+```
+
 ## Compile and run the project
 
 ```bash
