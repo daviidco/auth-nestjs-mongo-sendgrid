@@ -27,6 +27,51 @@ export const envSchema = z.object({
   // Throttle
   THROTTLE_TTL: z.coerce.number().min(1000).default(60000),
   THROTTLE_LIMIT: z.coerce.number().min(1).default(100),
+
+  // SendGrid Configuration
+  SENDGRID_API_KEY: z.string().min(1),
+  SENDGRID_FROM_EMAIL: z.string().email(),
+  SENDGRID_FROM_NAME: z.string().default('Auth Microservice'),
+
+  // Email Verification Settings
+  FRONTEND_URL: z.string().url().default('http://localhost:3001'),
+  EMAIL_VERIFICATION_URL: z.string().url().optional(),
+  PASSWORD_RESET_URL: z.string().url().optional(),
+  REQUIRE_EMAIL_VERIFICATION: z.coerce.boolean().default(false),
+
+  // Hybrid Email Verification Configuration
+  VERIFICATION_DEFAULT_MODE: z.enum(['web', 'api', 'hybrid']).default('web'),
+  ENABLE_HYBRID_VERIFICATION: z.coerce.boolean().default(true),
+  API_VERIFICATION_BASE_URL: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(val),
+      'Must be a valid URL',
+    ),
+  VERIFICATION_API_TIMEOUT: z.coerce
+    .number()
+    .min(5000)
+    .max(60000)
+    .default(30000),
+
+  // API Command Generation Settings
+  ENABLE_API_COMMANDS: z.coerce.boolean().default(true),
+  SUPPORTED_API_TOOLS: z.string().default('curl,httpie,postman'),
+  INCLUDE_API_EXAMPLES: z.coerce.boolean().default(true),
+
+  // Template Mode Detection
+  ENABLE_USER_AGENT_DETECTION: z.coerce.boolean().default(true),
+  FALLBACK_TO_WEB_MODE: z.coerce.boolean().default(true),
+  API_CLIENT_USER_AGENTS: z
+    .string()
+    .default('curl,httpie,postman,insomnia,rest-client'),
+
+  // Email Rate Limiting
+  EMAIL_RATE_LIMIT_TTL: z.coerce.number().default(60000),
+  EMAIL_RATE_LIMIT_MAX: z.coerce.number().default(2),
+  PASSWORD_RESET_RATE_LIMIT_TTL: z.coerce.number().default(300000),
+  PASSWORD_RESET_RATE_LIMIT_MAX: z.coerce.number().default(3),
 });
 
 // Inferencia TypeScript automática

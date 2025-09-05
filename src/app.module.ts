@@ -5,6 +5,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { VerificationModule } from './verification/verification.module';
+import { EmailModule } from './email/email.module';
+import { HealthModule } from './health/health.module';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging/logging.interceptor';
@@ -30,6 +33,9 @@ import { envSchema, getDatabaseConfig, getThrottlerConfig } from './config';
 
     AuthModule,
     UsersModule,
+    VerificationModule,
+    EmailModule,
+    HealthModule,
   ],
   providers: [
     {

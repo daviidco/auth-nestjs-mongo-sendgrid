@@ -2,12 +2,15 @@ import {
   Injectable,
   UnauthorizedException,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { PasswordUtil } from '../utils/password.util';
 import { TokenUtil } from '../utils/token.util';
+import { VerificationService } from '../verification/verification.service';
+import { getErrorMessage } from '../common/utils';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -22,12 +25,14 @@ import { EnvConfig } from 'src/config/env.zod';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService<EnvConfig>,
     private passwordUtil: PasswordUtil,
     private tokenUtil: TokenUtil,
+    private verificationService: VerificationService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<IAuthResponse> {
@@ -37,9 +42,26 @@ export class AuthService {
     // Guardar refresh token en la base de datos
     await this.usersService.updateRefreshTokens(user.id, [tokens.refreshToken]);
 
+    // Enviar email de verificación
+    try {
+      await this.verificationService.sendVerificationEmail(
+        user.id,
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+      );
+    } catch (error) {
+      // Log error but don't fail registration
+      this.logger.error('Failed to send verification email:', {
+        error: getErrorMessage(error),
+        userId: user.id,
+        email: user.email,
+      });
+    }
+
     return {
       user,
       ...tokens,
+      emailVerificationSent: true,
     };
   }
 
@@ -54,6 +76,17 @@ export class AuthService {
     const isLocked = await this.usersService.isAccountLocked(user);
     if (isLocked) {
       throw new ForbiddenException('Account is temporarily locked');
+    }
+
+    // Verificar email si está habilitado
+    const requireEmailVerification = this.configService.get(
+      'REQUIRE_EMAIL_VERIFICATION',
+      false,
+    );
+    if (requireEmailVerification && !user.emailVerified) {
+      throw new ForbiddenException(
+        'Please verify your email address before logging in',
+      );
     }
 
     const tokens = await this.generateTokens(user.toJSON());

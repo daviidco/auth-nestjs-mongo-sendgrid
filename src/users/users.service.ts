@@ -8,6 +8,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { PasswordUtil } from '../utils/password.util';
+import { toUserResponse } from './mappers/user.mapper';
 import { IUserResponse } from './interfaces/user.interface';
 
 @Injectable()
@@ -39,7 +40,7 @@ export class UsersService {
     });
 
     const savedUser = await user.save();
-    return savedUser.toJSON() as IUserResponse;
+    return toUserResponse(savedUser);
   }
 
   async findByEmail(email: string): Promise<UserDocument | null> {

@@ -43,6 +43,15 @@ export class User {
   @Prop({ default: null })
   lockUntil: Date;
 
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop({ default: null })
+  emailVerifiedAt: Date;
+
+  @Prop({ default: null })
+  passwordResetRequestedAt: Date;
+
   createdAt?: Date;
   updatedAt?: Date;
 }

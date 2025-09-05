@@ -1,38 +1,83 @@
+# Authentication Microservice
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <a href="http://nestjs.com/" target="blank">
+    <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  </a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">Auth microservuce using <a href="https://nestjs.com" target="_blank">Nestjs</a> framework,  <a href="https://www.mongodb.com" target="_blank">MondgoDB</a> and JWT.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <strong>Authentication microservice built with NestJS, MongoDB, JWT, and SendGrid email integration</strong>
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+<p align="center">
+  <a href="https://nodejs.org" target="_blank">
+    <img src="https://img.shields.io/badge/Node.js-18%2B-green" alt="Node.js Version" />
+  </a>
+  <a href="https://www.typescriptlang.org" target="_blank">
+    <img src="https://img.shields.io/badge/TypeScript-5.0-blue" alt="TypeScript" />
+  </a>
+  <a href="https://nestjs.com" target="_blank">
+    <img src="https://img.shields.io/badge/NestJS-10.0-red" alt="NestJS" />
+  </a>
+  <a href="https://www.mongodb.com" target="_blank">
+    <img src="https://img.shields.io/badge/MongoDB-7.0-green" alt="MongoDB" />
+  </a>
+</p>
 
-Authenticaction microservice with [Nest](https://github.com/nestjs/nest) framework TypeScript and MongoDB
+## 📖 Description
 
-## Project setup
+A robust authentication microservice built with modern technologies for secure user management and email verification.
 
-```bash
-$ npm install
-```
+### ✨ Key Features
 
-## Run Mongo Database
+- 🔐 **JWT Authentication** - Secure token-based authentication with refresh tokens
+- 📧 **Email Verification** - Account verification via SendGrid integration
+- 🔑 **Password Recovery** - Secure password reset functionality
+- 🛡️ **Role-based Access Control** - User roles and permissions management
+- 📊 **Health Monitoring** - Built-in health checks and system monitoring
+- 🚦 **Rate Limiting** - Protection against brute force attacks
+- 📚 **API Documentation** - Auto-generated Swagger/OpenAPI documentation
 
+### 🏗️ Architecture
+
+- **Framework**: NestJS with TypeScript
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT + Refresh Token strategy
+- **Email Service**: SendGrid for transactional emails
+- **Documentation**: Swagger/OpenAPI integration
+- **Validation**: Zod schema validation for environment variables
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- Docker (for MongoDB)
+- npm or yarn
+
+### 📦 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd auth-nestjs
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration values
+   ```
+
+### 🗄️ Database Setup
+
+**Start MongoDB with Docker:**
 ```bash
 docker run -d \
   --name mongo-auth \
@@ -41,68 +86,177 @@ docker run -d \
   mongo:latest
 ```
 
-## Compile and run the project
+### ⚙️ Environment Variables
 
-```bash
-# development
-$ npm run start
+Create a `.env` file with the following variables:
 
-# watch mode
-$ npm run start:dev
+```env
+# Database
+MONGODB_URI=mongodb://localhost:27017/auth_microservice
 
-# production mode
-$ npm run start:prod
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+REFRESH_TOKEN_SECRET=your-super-secret-refresh-token-key-min-32-chars
+
+# SendGrid Configuration  
+SENDGRID_API_KEY=your-sendgrid-api-key
+SENDGRID_FROM_EMAIL=noreply@yourdomain.com
+
+# Application
+PORT=3000
+NODE_ENV=development
 ```
 
-## Run tests
+### 🏃‍♂️ Running the Application
 
 ```bash
-# unit tests
-$ npm run test
+# Development mode with hot reload
+npm run start:dev
 
-# e2e tests
-$ npm run test:e2e
+# Production mode
+npm run start:prod
 
-# test coverage
-$ npm run test:cov
+# Standard development mode
+npm run start
 ```
 
-## Deployment
+The application will be available at:
+- **API**: http://localhost:3000
+- **Documentation**: http://localhost:3000/api
+- **Health Check**: http://localhost:3000/health
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 🧪 Testing
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Unit tests
+npm run test
+
+# End-to-end tests  
+npm run test:e2e
+
+# Test coverage report
+npm run test:cov
+
+# Watch mode for development
+npm run test:watch
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🛠️ Code Quality & Development
 
-## Resources
+### Linting and Formatting
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# Run ESLint with auto-fix
+npm run lint
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Format code with Prettier
+npm run format
+```
 
-## Support
+### Build
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Build for production
+npm run build
+```
 
-## Stay in touch
+## 📁 Project Structure
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+src/
+├── auth/                 # Authentication module
+│   ├── dto/             # Data Transfer Objects
+│   ├── strategies/      # Passport strategies
+│   └── interfaces/      # TypeScript interfaces
+├── users/               # User management module
+│   ├── schemas/         # Mongoose schemas
+│   ├── mappers/         # Data mappers
+│   └── entities/        # User entities
+├── verification/        # Email verification module
+│   ├── dto/             # Verification DTOs
+│   └── schemas/         # Token schemas
+├── health/              # Health check module
+├── email/               # Email service module
+├── common/              # Shared utilities
+│   ├── decorators/      # Custom decorators
+│   ├── filters/         # Exception filters
+│   ├── interceptors/    # Request interceptors
+│   └── validators/      # Custom validators
+├── config/              # Configuration files
+│   └── *.config.ts     # Environment configs
+└── guards/              # Authentication guards
+```
 
-## License
+## 📋 API Endpoints
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Authentication
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User login
+- `POST /auth/refresh` - Refresh access token
+- `POST /auth/logout` - User logout
+- `POST /auth/logout-all` - Logout from all devices
+
+### Email Verification
+- `POST /verification/verify-email` - Verify email address
+- `POST /verification/resend-verification` - Resend verification email
+- `POST /verification/request-password-reset` - Request password reset
+- `POST /verification/reset-password` - Reset password
+
+### Health Check
+- `GET /health` - Complete system health status
+- `GET /health/ping` - Simple API availability check
+- `GET /health/database` - Database connectivity check
+
+### Users
+- `GET /users` - Get all users
+- `GET /users/:id` - Get user by ID
+
+## 🚀 Deployment
+
+### Production Build
+```bash
+# Build the application
+npm run build
+
+# Start production server
+npm run start:prod
+```
+
+### Docker Deployment
+```bash
+# Build Docker image
+docker build -t auth-microservice .
+
+# Run container
+docker run -p 3000:3000 --env-file .env auth-microservice
+```
+
+### Environment Variables for Production
+Ensure these variables are properly configured:
+- `NODE_ENV=production`
+- `MONGODB_URI` - Production MongoDB connection string
+- `JWT_SECRET` - Strong JWT secret (32+ characters)
+- `SENDGRID_API_KEY` - Valid SendGrid API key
+- Rate limiting and security configurations
+
+## 📚 Documentation
+
+- **API Documentation**: Available at `/api` when running
+- **Health Monitoring**: Available at `/health`
+- **Interactive API Testing**: Use Swagger UI at `/api`
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is [MIT licensed](LICENSE).
+
+---
+
+**Built with ❤️ using NestJS, MongoDB, and TypeScript**

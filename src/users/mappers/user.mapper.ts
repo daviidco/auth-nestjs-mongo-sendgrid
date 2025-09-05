@@ -9,6 +9,8 @@ export function toUserResponse(user: UserDocument): IUserResponse {
     email: user.email,
     role: user.role,
     isActive: user.isActive,
+    emailVerified: user.emailVerified,
+    emailVerifiedAt: user.emailVerifiedAt,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

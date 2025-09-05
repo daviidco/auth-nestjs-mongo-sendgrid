@@ -1,11 +1,22 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, RequestMethod } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
+import { swaggerConfig } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Set global API prefix for versioning
+  app.setGlobalPrefix('api/v1', {
+    exclude: [
+      // Keep health checks unversioned for monitoring tools
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'health/ping', method: RequestMethod.GET },
+      { path: 'health/database', method: RequestMethod.GET }
+    ],
+  });
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -25,28 +36,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Swagger configuration
-  const config = new DocumentBuilder()
-    .setTitle('Auth Microservice API')
-    .setDescription('Microservicio de autenticación con NestJS, MongoDB y JWT')
-    .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
-    .addTag('Authentication', 'Endpoints para autenticación de usuarios')
-    .addTag('Users', 'Endpoints para gestión de usuarios')
-    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document, {
+  SwaggerModule.setup('api/v1/docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
@@ -56,9 +48,9 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(`🚀 Application is running on: http://localhost:${port}`);
-  console.log(
-    `📚 Swagger documentation available at: http://localhost:${port}/api`,
-  );
+  console.log(`📚 API Documentation: http://localhost:${port}/api/v1/docs`);
+  console.log(`🔄 API Version: v1`);
+  console.log(`❤️  Health Check: http://localhost:${port}/health`);
 }
 
 void bootstrap();

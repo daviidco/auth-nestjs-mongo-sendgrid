@@ -4,6 +4,7 @@ export interface IAuthResponse {
   user: IUserResponse;
   accessToken: string;
   refreshToken: string;
+  emailVerificationSent?: boolean;
 }
 
 export interface ITokenPayload {

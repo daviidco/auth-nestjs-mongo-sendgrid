@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
+import { VerificationModule } from '../verification/verification.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { PasswordUtil } from '../utils/password.util';
@@ -14,6 +15,7 @@ import { getJwtConfig } from '../config/jwt.config';
 @Module({
   imports: [
     UsersModule,
+    VerificationModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
