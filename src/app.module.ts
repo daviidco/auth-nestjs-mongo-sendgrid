@@ -8,9 +8,11 @@ import { UsersModule } from './users/users.module';
 import { VerificationModule } from './verification/verification.module';
 import { EmailModule } from './email/email.module';
 import { HealthModule } from './health/health.module';
+import { CommonModule } from './common/common.module';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging/logging.interceptor';
+import { ResponseFormatInterceptor } from './common/interceptors/response-format.interceptor';
 import { envSchema, getDatabaseConfig, getThrottlerConfig } from './config';
 
 @Module({
@@ -31,6 +33,7 @@ import { envSchema, getDatabaseConfig, getThrottlerConfig } from './config';
       inject: [ConfigService],
     }),
 
+    CommonModule,
     AuthModule,
     UsersModule,
     VerificationModule,
@@ -49,6 +52,10 @@ import { envSchema, getDatabaseConfig, getThrottlerConfig } from './config';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseFormatInterceptor,
     },
   ],
 })

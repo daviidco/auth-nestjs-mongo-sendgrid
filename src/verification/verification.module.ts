@@ -5,6 +5,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { VerificationController } from './verification.controller';
 import { VerificationService } from './verification.service';
 import { EmailModule } from '../email/email.module';
+import { CommonModule } from '../common/common.module';
 import {
   VerificationToken,
   VerificationTokenSchema,
@@ -13,6 +14,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
 
 @Module({
   imports: [
+    CommonModule,
     ConfigModule,
     ThrottlerModule,
     EmailModule,

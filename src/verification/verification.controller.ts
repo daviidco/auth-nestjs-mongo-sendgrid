@@ -7,8 +7,9 @@ import {
   Req,
   Get,
   Query,
+  Inject,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { VerificationService } from './verification.service';
@@ -17,34 +18,51 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { BaseController } from '../common/controllers/base.controller';
+import {
+  ApiStandardResponse,
+  ApiStandardErrorResponses,
+} from '../common/decorators/api-standard-response.decorator';
+import { BaseResponseDto } from '../common/dto/base-response.dto';
+import { RESPONSE_BUILDER } from '../common/providers/response.provider';
+import type { IResponseBuilder } from '../common/interfaces/response-builder.interface';
 
 @ApiTags('Email Verification')
 @Controller('verification')
-export class VerificationController {
-  constructor(private readonly verificationService: VerificationService) {}
+export class VerificationController extends BaseController {
+  constructor(
+    @Inject(VerificationService) private readonly verificationService: VerificationService,
+    @Inject(RESPONSE_BUILDER) responseBuilder: IResponseBuilder,
+  ) {
+    super(responseBuilder);
+  }
 
   @ApiOperation({ summary: 'Verify email address' })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Email verified successfully',
+    message: 'Email verified successfully',
   })
-  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  @ApiStandardErrorResponses()
   @Public()
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
-    return this.verificationService.verifyEmail(
+  async verifyEmail(
+    @Body() verifyEmailDto: VerifyEmailDto,
+  ): Promise<BaseResponseDto> {
+    const result = await this.verificationService.verifyEmail(
       verifyEmailDto.token,
       verifyEmailDto.email,
     );
+    return this.success(result, 'Email verified successfully');
   }
 
   @ApiOperation({ summary: 'Resend email verification' })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Verification email sent successfully',
+    message: 'Verification email sent successfully',
   })
+  @ApiStandardErrorResponses()
   @Public()
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
@@ -52,7 +70,7 @@ export class VerificationController {
   async resendVerification(
     @Body() resendVerificationDto: ResendVerificationDto,
     @Req() request: Request,
-  ) {
+  ): Promise<BaseResponseDto> {
     const ipAddress = request.ip;
     const userAgent = request.get('User-Agent');
 
@@ -62,16 +80,15 @@ export class VerificationController {
       userAgent,
     );
 
-    return {
-      message: 'Verification email sent successfully',
-    };
+    return this.success(null, 'Verification email sent successfully');
   }
 
   @ApiOperation({ summary: 'Request password reset' })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Password reset email sent if email exists',
+    message: 'If the email exists, a password reset link has been sent',
   })
+  @ApiStandardErrorResponses()
   @Public()
   @Post('request-password-reset')
   @HttpCode(HttpStatus.OK)
@@ -79,7 +96,7 @@ export class VerificationController {
   async requestPasswordReset(
     @Body() requestPasswordResetDto: RequestPasswordResetDto,
     @Req() request: Request,
-  ) {
+  ): Promise<BaseResponseDto> {
     const ipAddress = request.ip;
     const userAgent = request.get('User-Agent');
 
@@ -89,51 +106,56 @@ export class VerificationController {
       userAgent,
     );
 
-    return {
-      message: 'If the email exists, a password reset link has been sent',
-    };
+    return this.success(
+      null,
+      'If the email exists, a password reset link has been sent',
+    );
   }
 
   @ApiOperation({ summary: 'Reset password with token' })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Password reset successfully',
+    message: 'Password reset successfully',
   })
+  @ApiStandardErrorResponses()
   @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.verificationService.resetPassword(
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<BaseResponseDto> {
+    const result = await this.verificationService.resetPassword(
       resetPasswordDto.token,
       resetPasswordDto.email,
       resetPasswordDto.newPassword,
     );
+    return this.success(result, 'Password reset successfully');
   }
 
   @ApiOperation({ summary: 'Get verification options based on user agent' })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Returns available verification modes and capabilities',
+    message: 'Verification options retrieved successfully',
   })
+  @ApiStandardErrorResponses()
   @Public()
   @Get('options')
   @HttpCode(HttpStatus.OK)
-  async getVerificationOptions() {
+  async getVerificationOptions(): Promise<BaseResponseDto> {
     const options = this.verificationService.getVerificationOptions();
-
-    return {
-      message: 'Verification options retrieved successfully',
-      options,
-    };
+    return this.success(
+      { options },
+      'Verification options retrieved successfully',
+    );
   }
 
   @ApiOperation({ summary: 'Resend verification email with specific mode' })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Verification email sent successfully with specified mode',
+    message: 'Verification email sent successfully with specified mode',
   })
-  @ApiResponse({ status: 400, description: 'Invalid verification mode' })
+  @ApiStandardErrorResponses()
   @ApiQuery({
     name: 'mode',
     required: true,
@@ -148,7 +170,7 @@ export class VerificationController {
     @Body() resendVerificationDto: ResendVerificationDto,
     @Query('mode') mode: string,
     @Req() request: Request,
-  ) {
+  ): Promise<BaseResponseDto> {
     const ipAddress = request.ip;
     const userAgent = request.get('User-Agent');
 
@@ -159,10 +181,10 @@ export class VerificationController {
       userAgent,
     );
 
-    return {
-      message: `Verification email sent successfully with ${mode} mode`,
-      mode,
-    };
+    return this.success(
+      { mode },
+      `Verification email sent successfully with ${mode} mode`,
+    );
   }
 
   @ApiOperation({
@@ -170,14 +192,15 @@ export class VerificationController {
     description:
       'Returns API command examples and configuration for programmatic email verification',
   })
-  @ApiResponse({
-    status: 200,
+  @ApiStandardResponse(undefined, {
     description: 'Returns API verification capabilities and examples',
+    message: 'API verification capabilities retrieved successfully',
   })
+  @ApiStandardErrorResponses()
   @Public()
   @Get('api-capabilities')
   @HttpCode(HttpStatus.OK)
-  async getApiCapabilities() {
+  async getApiCapabilities(): Promise<BaseResponseDto> {
     const options = this.verificationService.getVerificationOptions();
 
     // Filter to show only API-related capabilities
@@ -198,9 +221,9 @@ export class VerificationController {
       ],
     };
 
-    return {
-      message: 'API verification capabilities retrieved successfully',
-      capabilities: apiCapabilities,
-    };
+    return this.success(
+      { capabilities: apiCapabilities },
+      'API verification capabilities retrieved successfully',
+    );
   }
 }

@@ -2,8 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, RequestMethod } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception/http-exception.filter';
 import { swaggerConfig } from './config/swagger.config';
+import { BaseResponseDto, ErrorResponseDto } from './common/dto/base-response.dto';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,8 +27,7 @@ async function bootstrap() {
     }),
   );
 
-  // Global exception filter
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // Exception filter is configured globally in AppModule
 
   // CORS configuration
   app.enableCors({
@@ -36,7 +35,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const document = SwaggerModule.createDocument(app, swaggerConfig, {
+    extraModels: [BaseResponseDto, ErrorResponseDto],
+  });
 
   SwaggerModule.setup('api/v1/docs', app, document, {
     swaggerOptions: {

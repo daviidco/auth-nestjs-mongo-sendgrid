@@ -20,8 +20,8 @@ import {
   IRefreshTokenPayload,
 } from './interfaces/auth.interface';
 import { UserDocument } from '../users/schemas/user.schema';
-import { toUserResponse } from 'src/users/mappers/user.mapper';
-import { EnvConfig } from 'src/config/env.zod';
+import { toUserResponse } from '../users/mappers/user.mapper';
+import { EnvConfig } from '../config/env.zod';
 
 @Injectable()
 export class AuthService {
