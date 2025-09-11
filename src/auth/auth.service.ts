@@ -81,7 +81,7 @@ export class AuthService {
     // Verificar email si está habilitado
     const requireEmailVerification = this.configService.get(
       'REQUIRE_EMAIL_VERIFICATION',
-      false,
+      true,
     );
     if (requireEmailVerification && !user.emailVerified) {
       throw new ForbiddenException(

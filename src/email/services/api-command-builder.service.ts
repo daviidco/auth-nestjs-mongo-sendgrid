@@ -75,10 +75,10 @@ export class ApiCommandBuilderService {
     }
 
     const fullUrl = this.buildFullUrl(config.baseUrl, config.endpoint);
-    const timeout = config.timeout || this.config.verificationApiTimeout;
+    const timeout = config.timeout || 30000;
 
     // Generate commands for each supported tool
-    for (const toolName of this.config.supportedApiTools) {
+    for (const toolName of this.getSupportedTools()) {
       const tool = this.mapToolName(toolName);
       if (tool) {
         try {
@@ -132,10 +132,10 @@ export class ApiCommandBuilderService {
     const notes: string[] = [];
 
     const fullUrl = this.buildFullUrl(config.baseUrl, config.endpoint);
-    const timeout = config.timeout || this.config.verificationApiTimeout;
+    const timeout = config.timeout || 30000;
 
     // Generate commands for each supported tool
-    for (const toolName of this.config.supportedApiTools) {
+    for (const toolName of this.getSupportedTools()) {
       const tool = this.mapToolName(toolName);
       if (tool) {
         try {
@@ -415,7 +415,7 @@ export class ApiCommandBuilderService {
    * @returns Whether API command generation is enabled
    */
   isApiCommandGenerationEnabled(): boolean {
-    return this.config.enableApiCommands;
+    return true;
   }
 
   /**
@@ -423,6 +423,6 @@ export class ApiCommandBuilderService {
    * @returns Array of supported tool names
    */
   getSupportedTools(): string[] {
-    return this.config.supportedApiTools;
+    return ['curl', 'httpie', 'postman'];
   }
 }

@@ -14,7 +14,7 @@ async function bootstrap() {
       // Keep health checks unversioned for monitoring tools
       { path: 'health', method: RequestMethod.GET },
       { path: 'health/ping', method: RequestMethod.GET },
-      { path: 'health/database', method: RequestMethod.GET }
+      { path: 'health/database', method: RequestMethod.GET },
     ],
   });
 

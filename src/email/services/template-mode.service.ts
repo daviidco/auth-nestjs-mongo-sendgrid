@@ -35,24 +35,14 @@ export class TemplateModeService {
   }
 
   /**
-   * Detects the appropriate verification mode based on user agent and request context
-   * @param userAgent - The user agent string from the request
-   * @param ipAddress - Optional IP address for additional context
+   * Detects the appropriate verification mode based on configuration
    * @param forceMode - Optional forced mode override
    * @returns Template mode detection result
    */
-  detectTemplateMode(
-    userAgent?: string,
-    ipAddress?: string,
-    forceMode?: VerificationMode,
-  ): ITemplateModeResult {
+  detectTemplateMode(forceMode?: VerificationMode): ITemplateModeResult {
     // If force mode is specified, use it
     if (forceMode) {
-      this.logger.log(`Using forced verification mode: ${forceMode}`, {
-        userAgent,
-        ipAddress,
-        forceMode,
-      });
+      this.logger.log(`Using forced verification mode: ${forceMode}`);
 
       return {
         mode: forceMode,
@@ -63,156 +53,28 @@ export class TemplateModeService {
       };
     }
 
-    // If user agent detection is disabled, use default mode
-    if (!this.config.enableUserAgentDetection) {
-      const defaultMode = this.config
-        .verificationDefaultMode as VerificationMode;
+    // Use configured default mode from environment
+    const defaultMode = this.config.verificationDefaultMode as VerificationMode;
 
-      this.logger.log(
-        `User agent detection disabled, using default mode: ${defaultMode}`,
-      );
-
-      return {
-        mode: defaultMode,
-        reason: 'User agent detection disabled',
-        isApiClient: false,
-      };
-    }
-
-    // If no user agent provided, fallback to web mode or default
-    if (!userAgent) {
-      const fallbackMode = this.config.fallbackToWebMode
-        ? VerificationMode.WEB
-        : (this.config.verificationDefaultMode as VerificationMode);
-
-      this.logger.log(
-        `No user agent provided, using fallback mode: ${fallbackMode}`,
-      );
-
-      return {
-        mode: fallbackMode,
-        reason: 'No user agent provided',
-        isApiClient: false,
-      };
-    }
-
-    // Detect API clients from user agent
-    const apiDetectionResult = this.detectApiClient(userAgent);
-
-    if (apiDetectionResult.isApiClient) {
-      // If hybrid verification is enabled and client is detected, use hybrid mode
-      if (this.config.enableHybridVerification) {
-        this.logger.log(`API client detected, using hybrid mode`, {
-          userAgent,
-          detectedClient: apiDetectionResult.detectedClient,
-        });
-
-        return {
-          mode: VerificationMode.HYBRID,
-          reason: `API client detected: ${apiDetectionResult.detectedClient}`,
-          isApiClient: true,
-          detectedClient: apiDetectionResult.detectedClient,
-        };
-      } else {
-        // If hybrid is disabled, use API mode
-        this.logger.log(
-          `API client detected, using API mode (hybrid disabled)`,
-          {
-            userAgent,
-            detectedClient: apiDetectionResult.detectedClient,
-          },
-        );
-
-        return {
-          mode: VerificationMode.API,
-          reason: `API client detected: ${apiDetectionResult.detectedClient}`,
-          isApiClient: true,
-          detectedClient: apiDetectionResult.detectedClient,
-        };
-      }
-    }
-
-    // Default to web mode for regular browsers
-    this.logger.log(`Regular browser detected, using web mode`, {
-      userAgent: userAgent.substring(0, 100), // Truncate for logging
-    });
+    this.logger.log(`Using configured verification mode: ${defaultMode}`);
 
     return {
-      mode: VerificationMode.WEB,
-      reason: 'Regular browser user agent',
-      isApiClient: false,
+      mode: defaultMode,
+      reason: 'Environment configuration',
+      isApiClient: defaultMode === VerificationMode.API,
+      detectedClient:
+        defaultMode === VerificationMode.API ? 'configured' : undefined,
     };
-  }
-
-  /**
-   * Detects if the user agent represents an API client
-   * @param userAgent - The user agent string to analyze
-   * @returns Detection result with client information
-   */
-  private detectApiClient(userAgent: string): {
-    isApiClient: boolean;
-    detectedClient?: string;
-  } {
-    if (!userAgent) {
-      return { isApiClient: false };
-    }
-
-    const lowerUserAgent = userAgent.toLowerCase();
-
-    // Check against configured API client user agents
-    for (const apiClient of this.config.apiClientUserAgents) {
-      if (lowerUserAgent.includes(apiClient)) {
-        return {
-          isApiClient: true,
-          detectedClient: apiClient,
-        };
-      }
-    }
-
-    // Additional patterns for API clients not explicitly configured
-    const apiPatterns = [
-      /^curl\/[\d.]+$/i,
-      /^httpie\/[\d.]+$/i,
-      /^postman-runtime\/[\d.]+$/i,
-      /^insomnia\/[\d.]+$/i,
-      /^rest-client$/i,
-      /^python-requests\/[\d.]+$/i,
-      /^node-fetch\/[\d.]+$/i,
-      /^axios\/[\d.]+$/i,
-      /api[-_]?client/i,
-      /rest[-_]?client/i,
-      /http[-_]?client/i,
-    ];
-
-    for (const pattern of apiPatterns) {
-      if (pattern.test(userAgent)) {
-        return {
-          isApiClient: true,
-          detectedClient: 'api-pattern-match',
-        };
-      }
-    }
-
-    return { isApiClient: false };
   }
 
   /**
    * Determines if API capabilities should be included in the response
    * @param mode - The detected verification mode
-   * @param userAgent - Optional user agent for additional checks
    * @returns Whether to include API capabilities
    */
-  shouldIncludeApiCapabilities(
-    mode: VerificationMode,
-    userAgent?: string,
-  ): boolean {
-    // Always include for API and hybrid modes
-    if (mode === VerificationMode.API || mode === VerificationMode.HYBRID) {
-      return true;
-    }
-
-    // For web mode, only include if API commands are enabled
-    return this.config.enableApiCommands && this.config.includeApiExamples;
+  shouldIncludeApiCapabilities(mode: VerificationMode): boolean {
+    // Include API capabilities for API and hybrid modes
+    return mode === VerificationMode.API || mode === VerificationMode.HYBRID;
   }
 
   /**

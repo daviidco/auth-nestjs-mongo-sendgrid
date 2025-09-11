@@ -166,11 +166,8 @@ export class EmailService {
   ): Promise<IEmailResult> {
     try {
       // Detect template mode based on user agent and configuration
-      const modeDetection = this.templateModeService.detectTemplateMode(
-        userAgent,
-        ipAddress,
-        forceMode,
-      );
+      const modeDetection =
+        this.templateModeService.detectTemplateMode(forceMode);
 
       this.logger.log('Template mode detected for verification email', {
         email,
@@ -204,8 +201,7 @@ export class EmailService {
             email,
             'verify-email',
           );
-          templateData.baseApiUrl =
-            this.config.apiVerificationBaseUrl || this.config.frontendUrl;
+          templateData.baseApiUrl = this.config.frontendUrl;
           templateData.verificationEndpoint = '/auth/verify-email';
         } catch (error) {
           this.logger.warn(
@@ -246,10 +242,7 @@ export class EmailService {
    * @returns Whether to generate API commands
    */
   private shouldGenerateApiCommands(mode: VerificationMode): boolean {
-    return (
-      this.config.enableApiCommands &&
-      (mode === VerificationMode.API || mode === VerificationMode.HYBRID)
-    );
+    return mode === VerificationMode.API || mode === VerificationMode.HYBRID;
   }
 
   /**
@@ -268,8 +261,7 @@ export class EmailService {
       throw new Error('API command generation is disabled');
     }
 
-    const baseUrl =
-      this.config.apiVerificationBaseUrl || this.config.frontendUrl;
+    const baseUrl = this.config.frontendUrl;
     const fullEndpoint = `/auth/${endpoint}`;
 
     const commandConfig: IApiCommandConfig = {
@@ -277,7 +269,7 @@ export class EmailService {
       endpoint: fullEndpoint,
       token,
       email,
-      timeout: this.config.verificationApiTimeout,
+      timeout: 30000,
       includeHeaders: true,
       includeVerboseOutput: false,
     };
@@ -289,21 +281,16 @@ export class EmailService {
 
   /**
    * Gets verification options based on current configuration
-   * @param userAgent - Optional user agent for mode detection
    * @returns Available verification options
    */
-  getVerificationOptions(userAgent?: string): IVerificationOptions {
-    const modeDetection =
-      this.templateModeService.detectTemplateMode(userAgent);
+  getVerificationOptions(): IVerificationOptions {
+    const modeDetection = this.templateModeService.detectTemplateMode();
 
     return {
       defaultMode: modeDetection.mode,
       availableModes: Object.values(VerificationMode),
       isApiClient: modeDetection.isApiClient,
       detectedClient: modeDetection.detectedClient,
-      hybridEnabled: this.config.enableHybridVerification,
-      apiCommandsEnabled: this.config.enableApiCommands,
-      supportedApiTools: this.apiCommandBuilderService.getSupportedTools(),
       verificationMethods:
         this.templateModeService.getVerificationMethodsPriority(
           modeDetection.mode,

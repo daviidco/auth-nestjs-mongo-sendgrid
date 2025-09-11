@@ -119,9 +119,8 @@ export class VerificationController {
   @Public()
   @Get('options')
   @HttpCode(HttpStatus.OK)
-  async getVerificationOptions(@Req() request: Request) {
-    const userAgent = request.get('User-Agent');
-    const options = this.verificationService.getVerificationOptions(userAgent);
+  async getVerificationOptions() {
+    const options = this.verificationService.getVerificationOptions();
 
     return {
       message: 'Verification options retrieved successfully',
@@ -178,18 +177,14 @@ export class VerificationController {
   @Public()
   @Get('api-capabilities')
   @HttpCode(HttpStatus.OK)
-  async getApiCapabilities(@Req() request: Request) {
-    const userAgent = request.get('User-Agent');
-    const options = this.verificationService.getVerificationOptions(userAgent);
+  async getApiCapabilities() {
+    const options = this.verificationService.getVerificationOptions();
 
     // Filter to show only API-related capabilities
     const apiCapabilities = {
       isApiClientDetected: options.isApiClient,
       detectedClient: options.detectedClient,
-      supportedApiTools: options.supportedApiTools,
-      apiCommandsEnabled: options.apiCommandsEnabled,
-      hybridModeEnabled: options.hybridEnabled,
-      recommendedMode: options.isApiClient ? 'api' : 'web',
+      recommendedMode: options.defaultMode,
       verificationMethods: options.verificationMethods,
       endpoints: {
         verify: '/auth/verification/verify-email',
@@ -199,8 +194,7 @@ export class VerificationController {
       notes: [
         'Use POST /auth/verification/verify-email with token and email in request body',
         'Include Content-Type: application/json header',
-        'API clients are automatically detected and receive optimized email templates',
-        'Hybrid mode provides both web and API verification options',
+        'Verification mode is configured globally in the application',
       ],
     };
 

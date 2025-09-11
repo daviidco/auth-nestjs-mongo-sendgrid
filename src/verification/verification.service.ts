@@ -167,6 +167,20 @@ export class VerificationService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<void> {
+    // Check if email verification is required
+    const requireEmailVerification = this.configService.get(
+      'REQUIRE_EMAIL_VERIFICATION',
+      true,
+    );
+
+    if (!requireEmailVerification) {
+      this.logger.log('Email verification is disabled, skipping email send', {
+        userId,
+        email,
+      });
+      return;
+    }
+
     const token = await this.createVerificationToken({
       userId,
       email,
@@ -175,55 +189,31 @@ export class VerificationService {
       userAgent,
     });
 
-    // Use hybrid verification if enabled
-    if (this.configService.get('ENABLE_HYBRID_VERIFICATION', true)) {
-      const result = await this.emailService.sendHybridVerificationEmail(
-        email,
-        name,
-        token,
-        userAgent,
-        ipAddress,
-      );
+    // Send verification email using configured mode
+    const result = await this.emailService.sendHybridVerificationEmail(
+      email,
+      name,
+      token,
+      userAgent,
+      ipAddress,
+    );
 
-      if (!result.success) {
-        this.logger.error(`Failed to send hybrid verification email`, {
-          userId,
-          email,
-          error: result.error,
-          userAgent: userAgent?.substring(0, 100),
-        });
-        throw new BadRequestException('Failed to send verification email');
-      }
-
-      this.logger.log(`Hybrid verification email sent successfully`, {
+    if (!result.success) {
+      this.logger.error(`Failed to send verification email`, {
         userId,
         email,
-        messageId: result.messageId,
+        error: result.error,
         userAgent: userAgent?.substring(0, 100),
       });
-    } else {
-      // Fallback to traditional verification email
-      const result = await this.emailService.sendVerificationEmail(
-        email,
-        name,
-        token,
-      );
-
-      if (!result.success) {
-        this.logger.error(`Failed to send verification email`, {
-          userId,
-          email,
-          error: result.error,
-        });
-        throw new BadRequestException('Failed to send verification email');
-      }
-
-      this.logger.log(`Verification email sent successfully`, {
-        userId,
-        email,
-        messageId: result.messageId,
-      });
+      throw new BadRequestException('Failed to send verification email');
     }
+
+    this.logger.log(`Verification email sent successfully`, {
+      userId,
+      email,
+      messageId: result.messageId,
+      userAgent: userAgent?.substring(0, 100),
+    });
   }
 
   async verifyEmail(
@@ -434,12 +424,11 @@ export class VerificationService {
   }
 
   /**
-   * Gets available verification options based on user agent and configuration
-   * @param userAgent - Optional user agent string
+   * Gets available verification options based on configuration
    * @returns Verification options and capabilities
    */
-  getVerificationOptions(userAgent?: string) {
-    return this.emailService.getVerificationOptions(userAgent);
+  getVerificationOptions() {
+    return this.emailService.getVerificationOptions();
   }
 
   /**
@@ -508,6 +497,20 @@ export class VerificationService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<void> {
+    // Check if email verification is required
+    const requireEmailVerification = this.configService.get(
+      'REQUIRE_EMAIL_VERIFICATION',
+      true,
+    );
+
+    if (!requireEmailVerification) {
+      this.logger.log('Email verification is disabled, skipping email send', {
+        email,
+        mode,
+      });
+      return;
+    }
+
     const user = await this.userModel.findOne({
       email: email.toLowerCase(),
       isActive: true,

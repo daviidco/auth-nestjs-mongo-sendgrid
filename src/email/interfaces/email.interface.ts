@@ -30,8 +30,5 @@ export interface IVerificationOptions {
   availableModes: string[];
   isApiClient: boolean;
   detectedClient?: string;
-  hybridEnabled: boolean;
-  apiCommandsEnabled: boolean;
-  supportedApiTools: string[];
   verificationMethods: string[];
 }
